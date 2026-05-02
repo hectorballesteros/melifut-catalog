@@ -127,13 +127,17 @@ export default function Catalog({ categories }: { categories: Category[] }) {
     activeFamily?.children.find((child) => child._id === activeChildId) || null;
 
   const selectParent = (parentId: string) => {
-    setActiveParentId(parentId);
+    setActiveParentId((currentParentId) =>
+      currentParentId === parentId ? null : parentId
+    );
     setActiveChildId(null);
   };
 
-  const resetView = () => {
-    setActiveParentId(null);
-    setActiveChildId(null);
+  const toggleChild = (parentId: string, childId: string) => {
+    setActiveParentId(parentId);
+    setActiveChildId((currentChildId) =>
+      currentChildId === childId ? null : childId
+    );
   };
 
   const renderProductsGrid = (products: Product[]) => (
@@ -148,7 +152,7 @@ export default function Catalog({ categories }: { categories: Category[] }) {
     <>
       <section className="mx-auto max-w-6xl">
         <div className="mb-8">
-          <div className="mb-3 flex items-end justify-between gap-4">
+          <div className="mb-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-500">
                 Catalogo
@@ -157,15 +161,6 @@ export default function Catalog({ categories }: { categories: Category[] }) {
                 Explora por categoria
               </h1>
             </div>
-
-            {activeParentId && (
-              <button
-                onClick={resetView}
-                className="rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-white/80 transition hover:border-white/30 hover:text-white"
-              >
-                Ver todo
-              </button>
-            )}
           </div>
 
           <div className="flex gap-3 overflow-x-auto rounded-2xl border border-white/10 bg-black/40 p-2 shadow-2xl shadow-black/20">
@@ -265,94 +260,45 @@ export default function Catalog({ categories }: { categories: Category[] }) {
 
         {activeFamily && (
           <section>
-            <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div className="flex items-center gap-3">
-                <CategoryIcon category={activeFamily.parent} />
-                <div>
-                  <p className="text-sm font-medium text-cyan-400">
-                    Categoria principal
-                  </p>
-                  <h2 className="text-2xl font-bold text-white">
+            <div className="mb-4 flex flex-wrap items-start gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="mb-2 flex items-center gap-2">
+                  <CategoryIcon category={activeFamily.parent} size="sm" />
+                  <h2 className="text-xl font-bold text-white">
                     {activeFamily.parent.name}
                   </h2>
                 </div>
               </div>
 
-              <span className="w-fit rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-white/70">
-                {activeFamily.products.length} productos
-              </span>
+              {activeFamily.children.length > 0 && (
+                <div className="flex w-full flex-wrap gap-2">
+                  {activeFamily.children.map((child) => {
+                    const isSelected = activeChildId === child._id;
+
+                    return (
+                      <button
+                        key={child._id}
+                        onClick={() =>
+                          toggleChild(activeFamily.parent._id, child._id)
+                        }
+                        className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition ${
+                          isSelected
+                            ? "bg-cyan-400 text-black shadow-[0_0_16px_rgba(34,211,238,0.35)]"
+                            : "bg-white/5 text-white/65 hover:bg-white/10 hover:text-white"
+                        }`}
+                      >
+                        {child.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            {activeFamily.children.length > 0 && (
-              <div className="mb-8 flex gap-2 overflow-x-auto border-b border-white/10 pb-3">
-                <button
-                  onClick={() => setActiveChildId(null)}
-                  className={`min-w-fit rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    !activeChildId
-                      ? "bg-cyan-400 text-black"
-                      : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  Todo
-                </button>
-
-                {activeFamily.children.map((child) => (
-                  <button
-                    key={child._id}
-                    onClick={() => setActiveChildId(child._id)}
-                    className={`flex min-w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      activeChildId === child._id
-                        ? "bg-cyan-400 text-black"
-                        : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
-                    }`}
-                  >
-                    {child.name}
-                    <span className="rounded-full bg-black/15 px-2 py-0.5 text-xs">
-                      {cleanProducts(child.products).length}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {activeChild ? (
-              renderProductsGrid(cleanProducts(activeChild.products))
-            ) : activeFamily.children.length > 0 ? (
-              <div className="space-y-10">
-                {cleanProducts(activeFamily.parent.products).length > 0 && (
-                  <div>
-                    <h3 className="mb-4 text-lg font-semibold text-white">
-                      {activeFamily.parent.name}
-                    </h3>
-                    {renderProductsGrid(cleanProducts(activeFamily.parent.products))}
-                  </div>
-                )}
-
-                {activeFamily.children.map((child) => {
-                  const products = cleanProducts(child.products);
-
-                  if (products.length === 0) return null;
-
-                  return (
-                    <div key={child._id}>
-                      <div className="mb-4 flex items-center justify-between gap-4">
-                        <h3 className="text-lg font-semibold text-white">
-                          {child.name}
-                        </h3>
-                        <button
-                          onClick={() => setActiveChildId(child._id)}
-                          className="rounded-full border border-white/10 px-3 py-1 text-sm font-medium text-white/70 transition hover:border-white/30 hover:text-white"
-                        >
-                          Ver subcategoria
-                        </button>
-                      </div>
-                      {renderProductsGrid(products)}
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              renderProductsGrid(activeFamily.products)
+            {renderProductsGrid(
+              activeChild
+                ? cleanProducts(activeChild.products)
+                : activeFamily.products
             )}
           </section>
         )}
@@ -364,7 +310,7 @@ export default function Catalog({ categories }: { categories: Category[] }) {
 
               return (
                 <section key={family.parent._id}>
-                  <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                  <div className="mb-4 flex flex-wrap items-start gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="mb-2 flex items-center gap-2">
                         <CategoryIcon category={family.parent} size="sm" />
@@ -374,23 +320,19 @@ export default function Catalog({ categories }: { categories: Category[] }) {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => selectParent(family.parent._id)}
-                      className="min-w-fit rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-white/75 transition hover:border-white/30 hover:text-white"
-                    >
-                      Ver todo
-                    </button>
-
                     {family.children.length > 0 && (
                       <div className="flex w-full flex-wrap gap-2">
                         {family.children.map((child) => (
                           <button
                             key={child._id}
-                            onClick={() => {
-                              setActiveParentId(family.parent._id);
-                              setActiveChildId(child._id);
-                            }}
-                            className="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold whitespace-nowrap text-white/65 transition hover:bg-white/10 hover:text-white"
+                            onClick={() =>
+                              toggleChild(family.parent._id, child._id)
+                            }
+                            className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition ${
+                              activeChildId === child._id
+                                ? "bg-cyan-400 text-black shadow-[0_0_16px_rgba(34,211,238,0.35)]"
+                                : "bg-white/5 text-white/65 hover:bg-white/10 hover:text-white"
+                            }`}
                           >
                             {child.name}
                           </button>
@@ -400,6 +342,17 @@ export default function Catalog({ categories }: { categories: Category[] }) {
                   </div>
 
                   {renderProductsGrid(preview)}
+
+                  {family.products.length > preview.length && (
+                    <div className="mt-5 flex justify-center">
+                      <button
+                        onClick={() => selectParent(family.parent._id)}
+                        className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white/80 transition hover:border-white/30 hover:bg-white/10 hover:text-white"
+                      >
+                        Ver todo de {family.parent.name}
+                      </button>
+                    </div>
+                  )}
                 </section>
               );
             })}
