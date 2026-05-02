@@ -364,31 +364,14 @@ export default function Catalog({ categories }: { categories: Category[] }) {
 
               return (
                 <section key={family.parent._id}>
-                  <div className="mb-4 flex items-start justify-between gap-4">
-                    <div>
+                  <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
                       <div className="mb-2 flex items-center gap-2">
                         <CategoryIcon category={family.parent} size="sm" />
                         <h2 className="text-xl font-bold text-white">
                           {family.parent.name}
                         </h2>
                       </div>
-
-                      {family.children.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {family.children.map((child) => (
-                            <button
-                              key={child._id}
-                              onClick={() => {
-                                setActiveParentId(family.parent._id);
-                                setActiveChildId(child._id);
-                              }}
-                              className="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"
-                            >
-                              {child.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
                     </div>
 
                     <button
@@ -397,6 +380,23 @@ export default function Catalog({ categories }: { categories: Category[] }) {
                     >
                       Ver todo
                     </button>
+
+                    {family.children.length > 0 && (
+                      <div className="flex w-full flex-wrap gap-2">
+                        {family.children.map((child) => (
+                          <button
+                            key={child._id}
+                            onClick={() => {
+                              setActiveParentId(family.parent._id);
+                              setActiveChildId(child._id);
+                            }}
+                            className="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold whitespace-nowrap text-white/65 transition hover:bg-white/10 hover:text-white"
+                          >
+                            {child.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {renderProductsGrid(preview)}
