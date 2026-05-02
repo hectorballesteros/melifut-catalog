@@ -3,6 +3,14 @@ export const categoriesWithProductsQuery = `
   _id,
   name,
   slug,
+  parent->{
+    _id,
+    name,
+    slug,
+    icon{
+      asset->{url}
+    }
+  },
   icon{
     asset->{url}
   },

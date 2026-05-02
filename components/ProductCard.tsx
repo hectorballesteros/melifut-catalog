@@ -9,7 +9,25 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/zoom";
 
-export default function ProductCard({ p }: any) {
+type ProductImage = {
+  asset: {
+    url: string;
+  };
+};
+
+type Product = {
+  _id: string;
+  name: string;
+  year?: number;
+  inStock?: boolean;
+  images?: ProductImage[];
+  team?: {
+    name?: string;
+    logo?: ProductImage;
+  };
+};
+
+export default function ProductCard({ p }: { p: Product }) {
   const [open, setOpen] = useState(false);
   const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "";
 
@@ -43,10 +61,11 @@ export default function ProductCard({ p }: any) {
       <div className="group bg-[#0f0f0f] border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 hover:shadow-2xl transition-all duration-300">
         <div className="relative cursor-pointer" onClick={() => setOpen(true)}>
           <Swiper modules={[Pagination]} pagination={{ clickable: true }}>
-            {p.images?.map((img: any, i: number) => (
+            {p.images?.map((img, i) => (
               <SwiperSlide key={i}>
                 <img
                   src={img.asset.url}
+                  alt={p.name}
                   className="w-full h-64 object-cover group-hover:scale-105 transition duration-500"
                 />
               </SwiperSlide>
@@ -57,7 +76,7 @@ export default function ProductCard({ p }: any) {
 
           {p.inStock && (
             <div className="absolute top-3 left-3 z-20">
-              <span className="inline-flexw-fit items-center gap-1 rounded-full bg-green-600 px-3 py-1 text-[11px] font-semibold text-white">
+              <span className="inline-flex w-fit items-center gap-1 rounded-full bg-green-600 px-3 py-1 text-[11px] font-semibold text-white">
                 {" "}
                 ✅ Stock Inmediato
               </span>
@@ -74,6 +93,7 @@ export default function ProductCard({ p }: any) {
             {p.team?.logo?.asset?.url && (
               <img
                 src={p.team.logo.asset.url}
+                alt=""
                 className="w-3 h-3 object-contain"
               />
             )}
@@ -116,11 +136,12 @@ export default function ProductCard({ p }: any) {
               zoom
               className="w-full max-w-5xl"
             >
-              {p.images?.map((img: any, i: number) => (
+              {p.images?.map((img, i) => (
                 <SwiperSlide key={i}>
                   <div className="swiper-zoom-container flex justify-center">
                     <img
                       src={img.asset.url}
+                      alt={p.name}
                       className="max-h-[70vh] object-contain"
                     />
                   </div>
@@ -147,6 +168,7 @@ export default function ProductCard({ p }: any) {
                   {p.team?.logo?.asset?.url && (
                     <img
                       src={p.team.logo.asset.url}
+                      alt=""
                       className="w-4 h-4 object-contain"
                     />
                   )}
